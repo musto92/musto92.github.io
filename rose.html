@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Gül Buketi ve Davet</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+
+        body { 
+            margin: 0; 
+            background: #020205; 
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        canvas { 
+            display: block;
+            z-index: 1;
+        }
+
+        #message {
+            position: absolute;
+            bottom: 15%;
+            font-family: 'Great Vibes', cursive;
+            font-size: 4rem;
+            color: #ff0000;
+            text-shadow: 0 0 10px #5e0000, 0 0 20px #b91c1c;
+            opacity: 0;
+            transition: opacity 3s ease-in;
+            z-index: 2;
+            text-align: center;
+            width: 100%;
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: transparent url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/123163/stars.png') repeat;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body>
+    <div class="stars"></div>
+    <canvas id="canvas"></canvas>
+    <div id="message">Bir kahve içmeye ne dersin?</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const msg = document.getElementById('message');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const roses = [];
+
+class RoseBranch {
+    constructor(x, y, angle, length, width, depth, color) {
+        this.x = x;
+        this.y = y;
+        this.angle = angle;
+        this.length = length;
+        this.width = width;
+        this.depth = depth;
+        this.color = color;
+        this.curLength = 0;
+        this.speed = 1.5 + Math.random() * 1.5;
+        this.finished = false;
+    }
+
+    draw() {
+        if (this.curLength < this.length) {
+            this.curLength += this.speed;
+        } else if (!this.finished) {
+            this.finished = true;
+            this.branch();
+        }
+
+        const endX = this.x + Math.cos(this.angle) * this.curLength;
+        const endY = this.y + Math.sin(this.angle) * this.curLength;
+
+        ctx.beginPath();
+        ctx.strokeStyle = '#11330d'; // Koyu yeşil dallar
+        ctx.lineWidth = this.width;
+        ctx.lineCap = 'round';
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+
+        // Dikenler
+        if (Math.random() > 0.95) {
+            ctx.fillStyle = '#2d0a0a';
+            ctx.fillRect(endX, endY, 2, 6);
+        }
+
+        // Gül kafaları (Sadece uçlarda ve belirli bir derinlikten sonra)
+        if (this.finished && this.depth <= 2) {
+            this.drawRoseHead(endX, endY);
+        }
+    }
+
+    drawRoseHead(x, y) {
+        ctx.shadowBlur = 25;
+        ctx.shadowColor = "#ff0000";
+        
+        // Katmanlı taç yapraklar
+        for(let i=0; i<8; i++) {
+            ctx.beginPath();
+            ctx.fillStyle = i % 2 === 0 ? '#b91c1c' : '#7f1d1d';
+            const r = 10 + (Math.random() * 5);
+            ctx.arc(x + Math.cos(i)*8, y + Math.sin(i)*8, r, 0, Math.PI*2);
+            ctx.fill();
+        }
+        
+        // Gül merkezi
+        ctx.beginPath();
+        ctx.fillStyle = '#450a0a';
+        ctx.arc(x, y, 5, 0, Math.PI*2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+    }
+
+    branch() {
+        if (this.depth <= 0) return;
+        
+        const num = Math.random() > 0.4 ? 2 : 1;
+        for (let i = 0; i < num; i++) {
+            const newAngle = this.angle + (Math.random() - 0.5) * 1.2;
+            const newLength = this.length * 0.82;
+            const endX = this.x + Math.cos(this.angle) * this.length;
+            const endY = this.y + Math.sin(this.angle) * this.length;
+            
+            roses.push(new RoseBranch(endX, endY, newAngle, newLength, this.width * 0.75, this.depth - 1));
+        }
+    }
+}
+
+function init() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    roses.length = 0;
+    
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height * 0.8; // Ekranın biraz altından başlar, ortaya doğru büyür
+
+    // 8 Ana Büyük Dal
+    for(let i=0; i<8; i++) {
+        const angle = -Math.PI/2 + (Math.random() - 0.5) * 2; // Yukarıya doğru geniş açı
+        const len = 120 + Math.random() * 40;
+        roses.push(new RoseBranch(centerX, centerY, angle, len, 8, 5));
+    }
+
+    // Yazıyı çiçekler büyüdükten sonra göster
+    setTimeout(() => {
+        msg.style.opacity = "1";
+    }, 4000);
+}
+
+function animate() {
+    roses.forEach(rose => rose.draw());
+    requestAnimationFrame(animate);
+}
+
+init();
+animate();
+
+// Tıklayınca her şeyi sıfırla ve yeniden büyüt
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    init();
+});
+</script>
+</body>
+</html>
