@@ -48,7 +48,7 @@
 <body>
     <div class="stars"></div>
     <canvas id="canvas"></canvas>
-    <div id="message">Bir De Bana Sor</div>
+    <div id="message">Bir Kahve İçelim Mi</div>
 
 <script>
 const canvas = document.getElementById('canvas');
@@ -149,7 +149,7 @@ function init() {
     const centerY = canvas.height * 0.8; // Ekranın biraz altından başlar, ortaya doğru büyür
 
     // 8 Ana Büyük Dal
-    for(let i=0; i<8; i++) {
+    for(let i=0; i<12; i++) {
         const angle = -Math.PI/2 + (Math.random() - 0.5) * 2; // Yukarıya doğru geniş açı
         const len = 120 + Math.random() * 40;
         roses.push(new RoseBranch(centerX, centerY, angle, len, 8, 5));
@@ -158,7 +158,7 @@ function init() {
     // Yazıyı çiçekler büyüdükten sonra göster
     setTimeout(() => {
         msg.style.opacity = "1";
-    }, 4000);
+    }, 3000);
 }
 
 function animate() {
@@ -178,4 +178,5 @@ window.addEventListener('resize', () => {
 </script>
 </body>
 </html>
+
 
